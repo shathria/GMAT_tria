@@ -56,46 +56,27 @@ if nCores == 'None':
 def setup_windows():
 	# 64-bit; change to x86 for 32-bit
 	vs_arch = 'x86_amd64'
-	vs_tools = 'vs' + vc_major_version + '0comntools'
-	if vs_version >= 2017:
-		vs_path_base = os.getenv("ProgramFiles(x86)") + '\\Microsoft Visual Studio\\' + str(vs_version)
-
-		# Check which edition of Visual Studio is installed
-		if os.path.exists(vs_path_base + '\\Enterprise'):
-			vs_path = vs_path_base + '\\Enterprise\\Common7\\Tools'
-		elif os.path.exists(vs_path_base + '\\Professional'):
-			vs_path = vs_path_base + '\\Professional\\Common7\\Tools'
-		elif os.path.exists(vs_path_base + '\\Community'):
-			vs_path = vs_path_base + '\\Community\\Common7\\Tools'
-		elif os.path.exists(vs_path_base + '\\WDExpress'):
-			vs_path = vs_path_base + '\\WDExpress\\Common7\\Tools'
-		else:
-			sys.exit("Could not find suitable Visual Studio development environment.")
-
-		syscall = vs_path + '\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat'
-	if vs_version <= 2015:
-		vs_path = vs_path = os.getenv(vs_tools)
-		syscall = vs_path + '\\..\\..\\VC\\vcvarsall.bat'
-	print('\"' + syscall + '\"' + " " + vs_arch + ' & set > vsEnvironment.txt')
-	os.system('\"' + syscall + '\"' + " " + vs_arch + ' & set > vsEnvironment.txt')
-	print('\"' + syscall + '\"' + " " + vs_arch + ' & set > vsEnvironment.txt')
-	
-	# Now parse the VC environment
+	v3_tools = 'vs' + vc_major_version + 'comntools'
+	vswhere = os.getenv("ProgramFiles(x86)")+"\\Microsoft Visual Studio\\Installer\\vswhere.exe"
+	VSInstallPath = os.popen('"' + vswhere + '" -property installationPath').read().strip()
+	print(VSInstallPath)
+	syscall = VSInstallPath + '\\VC\\Auxiliary\\Build\\vcvarsall.bat'
+	print('"' + syscall + '" ' + vs_arch + ' & set > vsEnvironment.txt')
+	os.system('"' + syscall + '" ' + vs_arch + ' & set > vsEnvironment.txt')
+	print('"' + syscall + '" ' + vs_arch + ' & set > vsEnvironment.txt')
+   # Now parse the VC environment
 	f = open('vsEnvironment.txt', 'r')
 	env = f.read().splitlines()
 	f.close()
-
 	for line in env:
-		pair = line.split('=', 1)
-		# print ("--> Setting " + pair[0] + " to " + pair[1])
-		os.environ[pair[0]] = pair[1]
-
-	# and delete the temporary settings file
+       		pair = line.split('=', 1)
+       		print("-- Setting " + pair[0] + " to " + pair[1])
+      		os.environ[pair[0]] = pair[1]
+   # and delete the temporary settings file
 	os.remove('vsEnvironment.txt')
-
-	# Add Cmake to path
-	sys.path.append('C:/Program Files/CMake/bin')
-
+   # Add CMake to path
+	sys.path.append('c:/Program Files/CMake/bin')
+	
 def download_depends():
 	wx_build = True
 	# Download xerces if it doesn't already exist
